@@ -11,8 +11,7 @@ class Scene2 extends Phaser.Scene {
 
     this.ship1 = this.add.sprite(config.width / 2 - 50, config.height / 2, "ship");
     this.ship2 = this.add.sprite(config.width / 2, config.height / 2, "ship2");
-    this.ship3 = this.add.sprite(config.width / 2 + 50, config.height / 2, "ship3");
-    
+    this.ship3 = this.add.sprite(config.width / 2 + 50, config.height / 2, "ship3");    
 
     this.enemies = this.physics.add.group();
     this.enemies.add(this.ship1);
@@ -39,7 +38,7 @@ class Scene2 extends Phaser.Scene {
     
     this.powerUps = this.physics.add.group();
 
-    var maxObjects = 4;
+    var maxObjects = 4  ;
     for (var i = 0; i <= maxObjects; i++) {
       var powerUp = this.physics.add.sprite(16, 16, "power-up");
       this.powerUps.add(powerUp);
@@ -88,13 +87,14 @@ class Scene2 extends Phaser.Scene {
     this.beamSound = this.sound.add("audio_beam");
     this.explosionSound = this.sound.add("audio_explosion");
     this.pickupSound = this.sound.add("audio_pickup");
+    this.resetPlayerSound = this.sound.add("audio_resetPlayer");
 
     // 2.1 create music
     this.music = this.sound.add("music");
 
     var musicConfig = {
       mute: false,
-      volume: 1,
+      volume: 0.2,
       rate: 1,
       detune: 0,
       seek: 0,
@@ -158,7 +158,12 @@ class Scene2 extends Phaser.Scene {
   }
 
   updateScore() { 
-    var scoreFormated = this.zeroPad(this.score, 6);
+    if (this.score == 100) {
+      this.enemies.add(this.ship1);
+      this.enemies.add(this.ship3);
+      this.enemies.add(this.ship2);
+      this.physics.add.overlap(this.projectiles, this.enemies, this.hitEnemy, null, this);
+    }
     this.scoreLabel.text = "SCORE: " + this.score + "    LIVES: "  + this.lives + "    HIGHSCORE: "  + this.highScore; 
   }
 
@@ -224,13 +229,15 @@ class Scene2 extends Phaser.Scene {
       targets: this.player,
       y: config.height - 64,
       ease: 'Power1',
-      duration: 1500,
+      duration: 1800,
       repeat: 0,
       onComplete: function(){
         this.player.alpha = 1;
       },
       callbackScope: this
     });
+
+    this.resetPlayerSound.play();
   }
 
   destroyShip(pointer, gameObject) {
